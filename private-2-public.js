@@ -8,41 +8,47 @@
 
 'use strict'
 
-const bsc = require('bs58check')
-const ripemd160 = require('ripemd160')
-const bs = require('bs58')
 const elliptic = require('elliptic')
 const BN = require('bn.js')
 
-function encodePublicKey(payload) {
-  const checksum = new ripemd160().update(payload).digest().slice(0, 4)
+const keyUtil = require('./key-util')
 
-  return bs.encode(Buffer.concat([payload, checksum]))
+function getPointFromEcc(n) {
+  const k1 = elliptic.curves.secp256k1
+  const pvt = new BN(n, 'be')
+  const pub = k1.g.mul(pvt)
+  const y = pub.getY().isEven() ? 2 : 3
+  return Buffer.from([y].concat(pub.getX().toArray()))
+}
+
+function legacyPrivateKeyToPublicKey(privateKey) {
+  const payload = keyUtil.stringToLegacyPrivateKey(privateKey)
+  return keyUtil.legacyPublicKeyToString('EOS', getPointFromEcc(payload))
 }
 
 function privateKeyToPublicKey(privateKey) {
-  const buf = bsc.decode(privateKey)
-  if (0x80 !== buf[0]) {
-    throw new Error('Not a private key.')
-  }
-  const k1 = elliptic.curves.secp256k1
-  const pvt = new BN(buf.slice(1), 'be')
-  const pub = k1.g.mul(pvt)
-  const y = pub.getY().isEven() ? 2 : 3
-  return 'EOS' + encodePublicKey(Buffer.from([y].concat(pub.getX().toArray())))
+  const payload = keyUtil.stringToPrivateKey(privateKey)
+  return keyUtil.keyToString('PUB_K1_', getPointFromEcc(payload), 'K1')
 }
 
 if (process.argv.length > 2) {
   for (let i = 2; i < process.argv.length; ++i) {
     const privateKey = process.argv[i]
-    const publicKey = privateKeyToPublicKey(privateKey)
+    if (privateKey.startsWith('PVT_K1_')) {
+      const publicKey = privateKeyToPublicKey(privateKey)
 
-    console.log(privateKey)
-    console.log(publicKey)
+      console.log(privateKey)
+      console.log(publicKey)
+    } else {
+      const publicKey = legacyPrivateKeyToPublicKey(privateKey)
+
+      console.log(keyUtil.convertLegacyPrivateKey(privateKey), privateKey)
+      console.log(keyUtil.convertLegacyPublicKey(publicKey), publicKey)
+    }
   }
 } else {
-  const privateKey = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
-  const publicKey = privateKeyToPublicKey(privateKey)
-  console.log(privateKey)
-  console.log(publicKey)
+  const privateKey = keyUtil.EXAMPLE_PRIVATE_KEY
+  const publicKey = legacyPrivateKeyToPublicKey(privateKey)
+  console.log(keyUtil.convertLegacyPrivateKey(privateKey), privateKey)
+  console.log(keyUtil.convertLegacyPublicKey(publicKey), publicKey)
 }
