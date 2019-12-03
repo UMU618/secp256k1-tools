@@ -18,7 +18,6 @@ module.exports = {
 
   , legacyPublicKeyToString: (prefix, payload) => {
     const checksum = new ripemd160().update(payload).digest().slice(0, 4)
-
     return prefix + bs.encode(Buffer.concat([payload, checksum]))
   }
 
@@ -42,10 +41,10 @@ module.exports = {
     return payload
   }
 
-  , stringToPrivateKey: (pk) => {
+  , stringToKey: (pk) => {
     const arr = pk.split('_')
-    if (arr.length !== 3 || arr[0] !== 'PVT') {
-      throw new Error('unrecognized private key format')
+    if (arr.length !== 3 || (arr[0] !== 'PVT' && arr[0] !== 'PUB')) {
+      throw new Error('unrecognized key format')
     }
     const type = arr[1]
     const bytes = bs.decode(arr[2])
@@ -55,34 +54,31 @@ module.exports = {
     const buf = Buffer.concat([payload, Buffer.from(type)])
     const expected = new ripemd160().update(buf).digest().slice(0, 4)
     if (!checksum.equals(expected)) {
-      throw new Error('private key\'s checksum doesn\'t match')
+      throw new Error('checksum doesn\'t match')
     }
-    return payload
+    return { prefix: arr[0], type: type, payload: payload }
   }
 
-  , keyToString: (prefix, payload, type) => {
+  , keyToString: (prefix, type, payload) => {
     const bytes = Buffer.concat([payload, Buffer.from(type)])
     const checksum = new ripemd160().update(bytes).digest().slice(0, 4)
-
-    return prefix + bs.encode(Buffer.concat([payload, checksum]))
+    return prefix + '_' + type + '_'
+      + bs.encode(Buffer.concat([payload, checksum]))
   }
 
   , convertLegacyPrivateKey: (lpk) => {
     if (!lpk || lpk.length !== 51) {
       return 'INVALID_PRIVATE_KEY'
     }
-  
-    return module.exports.keyToString('PVT_K1_'
-      , module.exports.stringToLegacyPrivateKey(lpk), 'K1')
+    return module.exports.keyToString('PVT', 'K1'
+      , module.exports.stringToLegacyPrivateKey(lpk))
   }
   
   , convertLegacyPublicKey: (lpk) => {
     if (!lpk || lpk.length < 50) {
       return 'INVALID_PUBLIC_KEY'
     }
-  
-    return module.exports.keyToString('PUB_K1_'
-      , module.exports.stringToLegacyPublicKey(lpk.slice(lpk.length - 50))
-      , 'K1')
+    return module.exports.keyToString('PUB', 'K1'
+      , module.exports.stringToLegacyPublicKey(lpk.slice(lpk.length - 50)))
   }
 }

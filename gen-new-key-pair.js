@@ -17,11 +17,11 @@ const key = k1.genKeyPair()
 
 const pri = key.getPrivate()
 console.log(pri)
-const prikey = keyUtil.keyToString('PVT_K1_', pri.toBuffer(), 'K1')
+const prikey = keyUtil.keyToString('PVT', 'K1', pri.toBuffer())
 console.log(prikey)
 
 const pub = key.getPublic()
 const y = pub.getY().isEven() ? 2 : 3
-const pubkey = keyUtil.keyToString('PUB_K1_'
-  , Buffer.from([y].concat(pub.getX().toArray())), 'K1')
+const pubkey = keyUtil.keyToString('PUB', 'K1'
+  , Buffer.from([y].concat(pub.getX().toArray())))
 console.log(pubkey)

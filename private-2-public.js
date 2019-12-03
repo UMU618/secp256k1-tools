@@ -27,8 +27,11 @@ function legacyPrivateKeyToPublicKey(privateKey) {
 }
 
 function privateKeyToPublicKey(privateKey) {
-  const payload = keyUtil.stringToPrivateKey(privateKey)
-  return keyUtil.keyToString('PUB_K1_', getPointFromEcc(payload), 'K1')
+  const { type, payload } = keyUtil.stringToPrivateKey(privateKey)
+  if (type !== 'K1') {
+    throw Error('Only support K1.')
+  }
+  return keyUtil.keyToString('PUB', type, getPointFromEcc(payload))
 }
 
 if (process.argv.length > 2) {

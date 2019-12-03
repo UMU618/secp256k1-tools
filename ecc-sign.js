@@ -47,4 +47,4 @@ for (;;) {
 }
 
 console.log(sigData)
-console.log(keyUtil.keyToString('SIG_K1_', sigData, 'K1'))
+console.log(keyUtil.keyToString('SIG', 'K1', sigData))
