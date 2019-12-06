@@ -27,7 +27,7 @@ function legacyPrivateKeyToPublicKey(privateKey) {
 }
 
 function privateKeyToPublicKey(privateKey) {
-  const { type, payload } = keyUtil.stringToPrivateKey(privateKey)
+  const { type, payload } = keyUtil.stringToKey(privateKey)
   if (type !== 'K1') {
     throw Error('Only support K1.')
   }
