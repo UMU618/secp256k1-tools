@@ -8,22 +8,11 @@
 
 'use strict'
 
-const elliptic = require('elliptic')
-const BN = require('bn.js')
-
 const keyUtil = require('./key-util')
-
-function getPointFromEcc(n) {
-  const k1 = elliptic.curves.secp256k1
-  const pvt = new BN(n, 'be')
-  const pub = k1.g.mul(pvt)
-  const y = pub.getY().isEven() ? 2 : 3
-  return Buffer.from([y].concat(pub.getX().toArray()))
-}
 
 function legacyPrivateKeyToPublicKey(privateKey) {
   const payload = keyUtil.stringToLegacyPrivateKey(privateKey)
-  return keyUtil.legacyPublicKeyToString('EOS', getPointFromEcc(payload))
+  return keyUtil.legacyPublicKeyToString('EOS', keyUtil.getPointFromEcc(payload))
 }
 
 function privateKeyToPublicKey(privateKey) {
@@ -31,7 +20,7 @@ function privateKeyToPublicKey(privateKey) {
   if (type !== 'K1') {
     throw Error('Only support K1.')
   }
-  return keyUtil.keyToString('PUB', type, getPointFromEcc(payload))
+  return keyUtil.keyToString('PUB', type, keyUtil.getPointFromEcc(payload))
 }
 
 if (process.argv.length > 2) {

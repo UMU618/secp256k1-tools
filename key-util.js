@@ -11,6 +11,8 @@
 const ripemd160 = require('ripemd160')
 const bs = require('bs58')
 const bsc = require('bs58check')
+const elliptic = require('elliptic')
+const BN = require('bn.js')
 
 module.exports = {
   EXAMPLE_PRIVATE_KEY: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
@@ -80,5 +82,13 @@ module.exports = {
     }
     return module.exports.keyToString('PUB', 'K1'
       , module.exports.stringToLegacyPublicKey(lpk.slice(lpk.length - 50)))
+  }
+
+  , getPointFromEcc: (n) => {
+    const k1 = elliptic.curves.secp256k1
+    const pvt = new BN(n, 'be')
+    const pub = k1.g.mul(pvt)
+    const y = pub.getY().isEven() ? 2 : 3
+    return Buffer.from([y].concat(pub.getX().toArray()))
   }
 }
