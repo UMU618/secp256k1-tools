@@ -30,9 +30,9 @@ if (process.argv.length > 2) {
       console.log(publicKey)
     } else if (hex.length === 130) {
       const b = Buffer.from(hex, 'hex')
-      assert((b[0] === 4) && (b[33] === 0x0b))
+      assert(b[0] === 4)
       const x = b.slice(1, 33)
-      const y = new BN(b.slice(34, 66), 'be')
+      const y = new BN(b.slice(33, 65), 'be')
       const publicKey = keyUtil.keyToString('PUB', 'K1'
         , Buffer.concat([Buffer.from([y.isEven() ? 2 : 3]), x]))
       console.log(publicKey)
