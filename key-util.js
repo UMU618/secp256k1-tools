@@ -13,6 +13,7 @@ const bs = require('bs58')
 const bsc = require('bs58check')
 const elliptic = require('elliptic')
 const BN = require('bn.js')
+const debug = require('debug')('secp256k1-tools:key-util')
 
 module.exports = {
   EXAMPLE_PRIVATE_KEY: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
@@ -87,7 +88,10 @@ module.exports = {
   , getPointFromEcc: (n) => {
     const k1 = elliptic.curves.secp256k1
     const pvt = new BN(n, 'be')
+    debug('pvt =', pvt.toString('hex'))
     const pub = k1.g.mul(pvt)
+    debug('x =', pub.getX().toString('hex'))
+    debug('y =', pub.getY().toString('hex'))
     const y = pub.getY().isEven() ? 2 : 3
     return Buffer.from([y].concat(pub.getX().toArray()))
   }

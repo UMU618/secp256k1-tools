@@ -13,6 +13,7 @@ const keyUtil = require('./key-util')
 const bsc = require('bs58check')
 const hash = require('hash.js')
 const EC = require('elliptic').ec
+const debug = require('debug')('secp256k1-tools:ecc-sign')
 
 const data = Buffer.from(
   // chainId
@@ -24,6 +25,7 @@ const data = Buffer.from(
 
 const digest = hash.sha256().update(data).digest()
 console.log(digest)
+debug('h =', Buffer.from(digest).toString('hex'))
 
 const k1 = new EC('secp256k1')
 const key = k1.keyFromPrivate(
@@ -42,6 +44,8 @@ for (;;) {
   if (!isCanonical(r) || !isCanonical(s)) {
     continue
   }
+  debug('r =', Buffer.from(r).toString('hex'))
+  debug('s =', Buffer.from(s).toString('hex'))
   sigData = new Uint8Array([sig.recoveryParam + 27].concat(r, s));
   break
 }
