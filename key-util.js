@@ -46,7 +46,7 @@ module.exports = {
 
   , stringToKey: (pk) => {
     const arr = pk.split('_')
-    if (arr.length !== 3 || (arr[0] !== 'PVT' && arr[0] !== 'PUB')) {
+    if (arr.length !== 3 || !['PVT', 'PUB', 'SIG'].includes(arr[0])) {
       throw new Error('unrecognized key format')
     }
     const type = arr[1]
