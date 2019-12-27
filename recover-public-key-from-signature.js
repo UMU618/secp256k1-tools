@@ -37,15 +37,17 @@ function recover(hash, sig) {
   const xinv = x.invm(k1.n)
   const K = u2.mul(s).mul(xinv)
 
-  debug('K =', K.getX().toString(16))
+  debug('K = [' + K.getX().toString(16) + ', ' + K.getY().toString(16) + ']')
   return keyUtil.keyToString('PUB', 'K1', Buffer.from(
     [K.getY().isEven() ? 2 : 3].concat(K.getX().toArray())))
 }
 
 if (process.argv.length > 3) {
   for (let i = 2; i < process.argv.length; i += 2) {
-    console.log('Recover(' + process.argv[i] + ', ' + process.argv[i + 1]
-       + ') =', recover(process.argv[i], process.argv[i + 1]))
+    const h = process.argv[i]
+    const sig = process.argv[i + 1]
+
+    console.log('Recover(' + h + ', ' + sig + ') =', recover(h, sig))
   }
 } else {
   const h = 'cc1839b254811f68631e64d203261fa88af8fc83c40ecb9822986695b55eb694'
